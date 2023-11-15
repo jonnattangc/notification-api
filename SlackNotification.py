@@ -17,6 +17,33 @@ except ImportError:
 class SlackNotification() :
     url = os.environ.get('SLACK_NOTIFICATION','None')
 
+
+    def getTypeMonitor(self, type) : 
+        if str(type) == '1' :
+            return 'HTTPS'
+        elif str(type) == '2' :
+            return 'KEYWORD'
+        elif str(type) == '3' :
+            return 'PING'
+        elif str(type) == '4' :
+            return 'PORT'
+        elif str(type) == '5' :
+            return 'HEARTBEAT'
+        else :
+            return 'DESCONOCIDO: ' + str(type)
+        
+    def getStateMonitor(self, state) : 
+        if str(state) == '0' :
+            return 'EN PAUSA'
+        elif str(state) == '1' :
+            return 'NO COMPROBADO'
+        elif str(state) == '8' :
+            return 'DEGRADADO'
+        elif str(state) == '9' :
+            return 'EN FALLA'
+        else :
+            return 'VALOR: ' + str(state)
+
     def notifyToChannel(self, data_notify ) : 
         m1 = datetime.now()
         response = None
@@ -27,7 +54,8 @@ class SlackNotification() :
 
         if int(count) > 0 and isOk.find('ok') == 0 :
             for monitor in data_notify['monitors'] :
-                if int(monitor['status']) != 2 :
+                if int(monitor['status']) != 2  and int(monitor['status']) != 0 :
+                    logging.info("MONITOR : " + str(monitor) )
                     errors.append(
                         {
                             'pretext'       : str(monitor['friendly_name']),
@@ -35,15 +63,20 @@ class SlackNotification() :
                             'color'         : 'danger',
                             'fields'        : [
                                     {
+                                        'title': 'Tipo Monitor',
+                                        'value': self.getTypeMonitor(str(monitor['type'])),
+                                        'short': True
+                                    },
+                                    {
+                                        'title': 'Estado de Monitor',
+                                        'value': self.getStateMonitor(str(monitor['status'])),
+                                        'short': True
+                                    },
+                                    {
                                         'title': 'Intervalo de consulta',
                                         'value': 'El monitor de consulta cada ' + str(monitor['interval']) + ' seg.',
                                         'short': False
                                     },
-                                    {
-                                        'title': 'Razón Caída',
-                                        'value': str(monitor['reason']),
-                                        'short': True
-                                    }
                             ]
                         }
                     )
