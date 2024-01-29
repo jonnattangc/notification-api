@@ -23,7 +23,7 @@ formatter = logging.Formatter(FORMAT)
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)
 handler.setFormatter(formatter)
-filehandle = logging.FileHandler('servidor.log')
+filehandle = logging.FileHandler('Monitor.log')
 filehandle.setLevel(logging.INFO)
 filehandle.setFormatter(formatter)
 # se meten ambas configuraciones
