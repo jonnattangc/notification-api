@@ -7,8 +7,9 @@ try:
     import json
     import requests
     import pymysql.cursors
-    from datetime import datetime
+    import time
     from SlackNotification import SlackNotification
+    from EmailNotification import EmailNotification
 
 except ImportError:
 
@@ -45,7 +46,7 @@ class CheckStatus() :
         logging.info("Reciv " + str(request.method) )
         logging.info("Reciv Data: " + str(request.data) )
         logging.info("Reciv Header : " + str(request.headers) )
-        m1 = datetime.now()
+        m1 = time.monotonic()
 
         data_status = { "status":False }
         code = 402
@@ -68,6 +69,6 @@ class CheckStatus() :
                     data_status = { "status": True }
         except Exception as e:
             print("ERROR Status:", e)
-        diff = datetime.now() - m1
-        logging.info("Procesado en " + str(diff) + " MS")
+        diff = time.monotonic() - m1
+        logging.info("Procesado en " + str(diff) + " Seg")
         return data_status, code

@@ -7,6 +7,7 @@ try:
     from flask import Flask, jsonify, redirect, send_from_directory, request, render_template
     from flask_cors import CORS
     from CheckStatus import CheckStatus
+    from EmailNotification import EmailNotification
 except ImportError:
     logging.error(ImportError)
     print((os.linesep * 2).join(['Error al buscar los modulos:', str(sys.exc_info()[1]), 'Debes Instalarlos para continuar', 'Deteniendo...']))
@@ -93,6 +94,17 @@ def status() :
     data, code = check.getStatusPages( request )
     del check
     return jsonify( data ), code
+
+#===============================================================================
+# Testea envio de mail (desactivado)
+#===============================================================================
+@app.route('/sendmail', methods=['POST'])
+def mail() :
+    mail = EmailNotification()
+    data, code = mail.processSendEmail( request )
+    del mail
+    return jsonify( data ), code
+
 
 # ===============================================================================
 # Metodo Principal que levanta el servidor
