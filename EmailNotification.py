@@ -35,7 +35,8 @@ class EmailNotification():
         try :
             if request.headers['x-api-key'] == self.api_key :
                 request_data = request.get_json()
-                success, msg = self.sendMailMessage(request_data['to'], request_data['type'], request_data['msg'])
+                subject = 'Mensaje de ' + str(request_data['type'])
+                success, msg = self.sendMailMessage(request_data['to'], subject, request_data['msg'])
                 if success == False :
                     code = 500
             else :
@@ -57,16 +58,16 @@ class EmailNotification():
         return response, code 
     
 
-    def sendMailMessage(self, to, type, text):
+    def sendMailMessage(self, to, subject, text):
         success = True
         response = 'Mensaje Enviado Exitosamente'
         try :
             msg = EmailMessage()
-            msg['Subject'] = f'Mensaje de {str(type)}'
+            msg['Subject'] = str(subject)
             msg['From'] = str(self.user)
             msg['To'] = str(to)
             msg.set_content(str(text))
-            logging.info("Connect Server Mail..." )
+            logging.info("Connect to Server Mail..." )
             server = smtplib.SMTP(self.smtp_server, self.smtp_port)
             server.connect(self.smtp_server, self.smtp_port)
             server.ehlo()
@@ -75,7 +76,7 @@ class EmailNotification():
             logging.info("Login on Server Mail..." )
             server.login(self.user, self.password)
             server.send_message(msg)
-            logging.info("Message sent..." )
+            logging.info("Mail Message sent..." )
             server.quit()
         except Exception as e:
             print("ERROR Mail:", e)
