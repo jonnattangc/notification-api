@@ -6,7 +6,7 @@ try:
     import os
     import json
     import requests
-    from datetime import datetime
+    import time
 
 except ImportError:
 
@@ -41,11 +41,14 @@ class SlackNotification() :
             return 'DEGRADADO'
         elif str(state) == '9' :
             return 'EN FALLA'
+        elif str(state) == '2' :
+            return 'FUNCIONANDO CORRECTAMENTE'
         else :
             return 'VALOR: ' + str(state)
 
     def notifyToChannel(self, data_notify ) : 
-        m1 = datetime.now()
+        ret = True
+        m1 = time.monotonic()
         response = None
         request_tx = {}
         errors = []
@@ -54,7 +57,7 @@ class SlackNotification() :
 
         if int(count) > 0 and isOk.find('ok') == 0 :
             for monitor in data_notify['monitors'] :
-                if int(monitor['status']) != 2  and int(monitor['status']) != 0 :
+                if int(monitor['status']) != 0 :
                     logging.info("MONITOR : " + str(monitor) )
                     errors.append(
                         {
@@ -99,8 +102,11 @@ class SlackNotification() :
                         else :
                             logging.info("No se notifica nada por Slak")
                         
-                        diff = datetime.now() - m1
-                        logging.info("Notificado en " + str(diff) + " MS")
+                        diff = time.monotonic() - m1
+                        logging.info("Notificado en " + str(diff) + " Seg")
                 except Exception as e:
                     logging.info("Response JSON: " + str( data_notify ) )
                     print("ERROR POST:", e)
+                    ret = False
+
+        return ret
