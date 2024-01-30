@@ -46,24 +46,40 @@ class SlackNotification() :
         else :
             return 'VALOR: ' + str(state)
 
+    def getMonitorColor(self, state) : 
+        if str(state) == '0' :
+            return 'warning'
+        elif str(state) == '1' :
+            return 'warning'
+        elif str(state) == '8' :
+            return 'warning'
+        elif str(state) == '9' :
+            return 'danger'
+        elif str(state) == '2' :
+            return 'good'
+        else :
+            return 'warning'
+
     def notifyToChannel(self, data_notify ) : 
         ret = True
         m1 = time.monotonic()
         response = None
         request_tx = {}
-        errors = []
+        monitors = []
         count = str(data_notify['pagination']['total'])
         isOk = str(data_notify['stat'])
-
+        count_errors = 0
         if int(count) > 0 and isOk.find('ok') == 0 :
             for monitor in data_notify['monitors'] :
                 if int(monitor['status']) != 0 :
                     logging.info("MONITOR : " + str(monitor) )
-                    errors.append(
+                    if int(monitor['status']) != 2 :
+                        count_errors = count_errors + 1
+                    monitors.append(
                         {
                             'pretext'       : str(monitor['friendly_name']),
                             'text'          : 'URL: ' + str(monitor['url']),
-                            'color'         : 'danger',
+                            'color'         : self.getMonitorColor(str(monitor['status'])),
                             'fields'        : [
                                     {
                                         'title': 'Tipo Monitor',
@@ -84,11 +100,11 @@ class SlackNotification() :
                         }
                     )
 
-            if len(errors) > 0 :
+            if len(monitors) > 0 :
                 request_tx = {
-                    'username': 'ALERTA: Notificación de algo funcionando mal',
-                    'text': 'Existen ' + str(len(errors)) + ' monitoreos automáticos que se deben analizar',
-                    'attachments': errors
+                    'username': 'ALERTA: Cambio de Estado en monitores',
+                    'text': 'Hay ' + str(count_errors) + ' monitores que se deben analizar',
+                    'attachments': monitors
                 }
                 try :
                     logging.info("URL : " + self.url )
