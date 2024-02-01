@@ -12,6 +12,7 @@ try:
     from datetime import datetime
     from SlackNotification import SlackNotification
     from EmailNotification import EmailNotification
+    from WazaMessage import WazaMessage 
 
 except ImportError:
 
@@ -43,7 +44,7 @@ class CheckStatus() :
     
     def getStatusPages(self, request ) : 
         m1 = time.monotonic()
-        data_status = { "status":False }
+        data_status = { "Status": "Ok", "Message": "Servicios Operando Correctamente" }
         code = 402
 
         try :
@@ -58,49 +59,71 @@ class CheckStatus() :
                     if response.status_code == 200 :
                         data_response = response.json()
                         hash = hashlib.sha512(bytes(json.dumps(data_response), 'utf-8')).hexdigest()
-                        exists = self.notifiedHash(hash)
-                        # logging.info("Hash : " + str(hash) + " - Exists : " + str(exists))
-                        if exists == None :
+                        if self.notifiedHashExist(hash) :
+                            logging.info("No hay cambio de estado que notificar")
+                            data_status = { "Status": "Ok", "Message": "No hay cambios de estados que notificar" }
+                        else :
+                            mail = EmailNotification() 
+                            waza = WazaMessage()
+                            data_status = { "Status": "Ok", "Message": "Se han notificado cambio de estados" }
                             if self.saveNotification(data_response, hash) :
                                 slack = SlackNotification() 
                                 if not slack.notifyToChannel( data_response ) :
-                                    mail = EmailNotification() 
-                                    mail.sendMailMessage( 'jonnattan@gmail.com','Error Procesando Datos', 'Data de Slack:\n' + str(data_response))
-                                    del mail 
+                                    mail.sendMailMessage( 'jonnattan@gmail.com','[Monitor] Error Procesando Datos', 'Data de Slack:\n' + str(data_response))
+                                    data_status = { "Status": "Ok", "Message": "No se pudo notificar en Slack cambio de estado" }
+                                    waza.sendWazaMessage("Revisa tu correo, hay hay un error reportado" )
+                                else:
+                                    data_status = { "Status": "Ok", "Message": "Se notifico en Slack cambio de estado" }
+                                    waza.sendWazaMessage("Revisa tu slack, hay un cambio de estado reportado !!!" )
                                 del slack
                             else:
-                                mail = EmailNotification() 
-                                mail.sendMailMessage( 'jonnattan@gmail.com','Error Guardando en Base de Datos', 'No se pudo guardar en BD de Notificaciones')
-                                del mail
-                        else :
-                            logging.info("No hay cambio de estado que notificar")
-                        data_status = { "status": True }
+                                mail.sendMailMessage( 'jonnattan@gmail.com','[Monitor] Error Guardando en Base de Datos', 'No se pudo guardar en BD de Notificaciones')
+                                data_status = { "Status": "NOk", "Message": "Error Guardando en Base de Datos" }
+                                waza.sendWazaMessage("Revisa tu Monitor, hay un error de BD !!!" )
+                            del mail
+                            del waza
         except Exception as e:
             print("ERROR Status:", e)
         diff = time.monotonic() - m1
         logging.info("Procesado en " + str(diff) + " Seg")
         return data_status, code
     
-    def notifiedHash(self, hash) :
-        sql = "SELECT * FROM `notifications` WHERE `hash_notification` = %s"
+    def notifiedHashExist(self, hash) :
+        sql = "SELECT * FROM `notifications` WHERE `notification_hash` = %s and `notification_active` = %s"
         cursor = self.db.cursor()
-        cursor.execute(sql, (hash))
+        cursor.execute(sql, (hash, True))
         result = cursor.fetchone()
         cursor.close()
         return result
     
     def saveNotification(self, data, hash) :
-        saved = True
+        saved = False
         try :
-            if self.db != None :
-                sql = """INSERT INTO notifications (destination_name, destination_type, destination_value, notification_type, notification_date, hash_notification ) VALUES (%s, %s, %s, %s, %s, %s)"""
+            if self.db != None and self.desableAllNotification() :
+                sql = """INSERT INTO notifications (destination_name, destination_type, destination_value, notification_type, notification_date, notification_hash, notification_active ) VALUES (%s, %s, %s, %s, %s, %s,%s)"""
                 cursor = self.db.cursor()
                 now = datetime.now()
-                cursor.execute(sql, ('Canal JonnaChannel', 'Slack', str(data), 'Cambio Estado', now.strftime("%Y-%m-%d %H:%M:%S"), str(hash) ))
+                cursor.execute(sql, ('Canal JonnaChannel', 'Slack', str(data), 'Cambio Estado', now.strftime("%Y-%m-%d %H:%M:%S"), str(hash), True ))
                 self.db.commit()
                 cursor.close()
+                saved = True
         except Exception as e:
             print("ERROR BD:", e)
             self.db.rollback()
-            saved = False
+        return saved
+    
+    def desableAllNotification(self) :
+        saved = False
+        try :
+            if self.db != None :
+                sql = """UPDATE notifications SET notification_active = %s WHERE notification_date < %s"""
+                cursor = self.db.cursor()
+                now = datetime.now()
+                cursor.execute(sql, (False, now.strftime("%Y-%m-%d %H:%M:%S") ))
+                self.db.commit()
+                cursor.close()
+                saved = True
+        except Exception as e:
+            print("ERROR BD:", e)
+            self.db.rollback()
         return saved

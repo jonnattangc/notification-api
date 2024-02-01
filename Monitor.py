@@ -8,6 +8,7 @@ try:
     from flask_cors import CORS
     from CheckStatus import CheckStatus
     from EmailNotification import EmailNotification
+    from WazaMessage import WazaMessage 
 except ImportError:
     logging.error(ImportError)
     print((os.linesep * 2).join(['Error al buscar los modulos:', str(sys.exc_info()[1]), 'Debes Instalarlos para continuar', 'Deteniendo...']))
@@ -105,6 +106,15 @@ def mail() :
     del mail
     return jsonify( data ), code
 
+#===============================================================================
+# Testea envio de mensa vía whatsapp (desactivado)
+#===============================================================================
+@app.route('/wazap', methods=['POST'])
+def wazap() :
+    waza = WazaMessage()
+    data, code = waza.requestProcess(request )
+    del waza
+    return jsonify( data ), code
 
 # ===============================================================================
 # Metodo Principal que levanta el servidor
