@@ -18,7 +18,7 @@ class EmailNotification():
 
     user = os.environ.get('USER_MAIL','None')
     password = os.environ.get('PASS_MAIL','None')
-    api_key = os.environ.get('API_KEY_MAIL','None')
+    api_key = os.environ.get('API_KEY_MONITORING','None')
     smtp_server = 'smtp.gmail.com'
     smtp_port = 587
 
