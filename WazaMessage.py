@@ -22,6 +22,7 @@ class WazaMessage() :
     password = os.environ.get('PASS_BD','None')
     waza_token = os.environ.get('WAZA_BEARER_TOKEN','None')
     api_key = os.environ.get('API_KEY_MONITORING','None')
+    phone_id = os.environ.get('PHONE_ID','None')
 
     database = 'gral-purpose'
     environment = None
@@ -63,30 +64,60 @@ class WazaMessage() :
             print("ERROR BD:", e)
             self.db.rollback()
 
-    def sendWazaMessage(self, msgTx, to = '56992116678' ) :
+    def sendWazaMessage(self, name, system, to = '56992116678' ) :
+
+        #data_json = {
+        #    'messaging_product' : 'whatsapp',
+        #    'recipient_type'    : 'individual',
+        #    'to'                : str(to),
+        #    'type'              : 'text',
+        #    'text'              : { 'preview_url': False, 'body': str(msgTx), }
+        #}
 
         data_json = {
             'messaging_product' : 'whatsapp',
             'recipient_type'    : 'individual',
             'to'                : str(to),
-            'type'              : 'text',
-            'text'              : { 'preview_url': False, 'body': str(msgTx), }
+            'type'              : 'template',
+            'template': {
+                'name': "alerta_sistema",
+                'language': {
+                    'code': 'es_ES',
+                    'policy': 'deterministic'
+                }, 
+                'components': [
+                        {
+                        'type': 'HEADER',
+                        'parameters': [
+                            {
+                            'type': 'text',
+                            'text': str(name)
+                            }
+                        ]
+                        },
+                        {
+                        'type': 'BODY',
+                        'parameters': [
+                            {
+                            'type': 'text',
+                            'text': str(system)
+                            }
+                        ]
+                        },
+                ]
+            }
         }
 
-        name_id_number = '107854109079987'
-        # logging.info("Request Trx " + str(data_json) )
-        url = 'https://graph.facebook.com/v18.0/' + str(name_id_number) + '/messages'
-        # logging.info("URL : " + url )
+        url = 'https://graph.facebook.com/v18.0/' + str(self.phone_id) + '/messages'
+        # logging.info("Request To : " + url )
         try :
             response = requests.post(url, data = json.dumps(data_json), headers = self.headers, timeout = 40)
-            logging.info("Response : " + str( response ) )
             data_response = response.json()
-            logging.info("Response JSON : " + str( data_response ) )
-
             if response.status_code != None and response.status_code == 200 :
                 data_response = response.json()
                 logging.info("Response : " + str( data_response ) )
-
+            else :
+                logging.error("ERROR Response : " + str( data_response ) )
         except Exception as e:
             print("ERROR POST:", e)
 
@@ -109,7 +140,7 @@ class WazaMessage() :
             request_data = request.get_json()
             try :
                 m1 = time.monotonic()
-                data_response, errorCode = self.sendWazaMessage( request_data['msg'], request_data['to'] )
+                data_response, errorCode = self.sendWazaMessage( request_data['name'], request_data['system'], request_data['to'] )
                 diff = time.monotonic() - m1;
                 logging.info("Time Response in " + str(diff) + " sec." )
             except Exception as e:
