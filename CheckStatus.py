@@ -38,7 +38,7 @@ class CheckStatus() :
             self.db.close()
 
     def isConnect(self) :
-        return self.db != None
+        return self.db is not None
     
     def getStatusPages(self, request ) : 
         logging.info("KEY " + str(self.api_key) )
