@@ -71,15 +71,14 @@ class CheckStatus() :
                                 if not slack.notifyToChannel( data_response ) :
                                     mail.sendMailMessage( 'jonnattan@gmail.com','[Monitor] Error Procesando Datos', 'Data de Slack:\n' + str(data_response))
                                     data_status = { "Status": "Ok", "Message": "No se pudo notificar en Slack cambio de estado" }
-                                    waza.sendWazaMessage("Revisa tu correo, hay hay un error reportado" )
+                                    waza.sendWazaMessage("Jonnattan", "Notificación vía Slak" )
                                 else:
                                     data_status = { "Status": "Ok", "Message": "Se notifico en Slack cambio de estado" }
-                                    waza.sendWazaMessage("Revisa tu slack, hay un cambio de estado reportado !!!" )
                                 del slack
                             else:
                                 mail.sendMailMessage( 'jonnattan@gmail.com','[Monitor] Error Guardando en Base de Datos', 'No se pudo guardar en BD de Notificaciones')
                                 data_status = { "Status": "NOk", "Message": "Error Guardando en Base de Datos" }
-                                waza.sendWazaMessage("Revisa tu Monitor, hay un error de BD !!!" )
+                                waza.sendWazaMessage("Jonnattan", "Conexión a BD" )
                             del mail
                             del waza
         except Exception as e:
