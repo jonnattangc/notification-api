@@ -1,0 +1,19 @@
+services:
+    notification-api:
+      container_name: notification-api
+      # Crea la imagen con el archivo Dockerfile de esta misma carpeta
+      image: notification:prd
+      build: .
+      restart: always
+      volumes:
+        - ./app:/home/jonnattan/app
+        - ../envs/file.aws_credentials:/home/jonnattan/.aws/credentials  # Archivo que no puede ser versionado
+      ports:
+        - "8060:8060"
+      env_file:
+        - ../envs/notification_api.env
+      networks:
+        - db-net
+      # command: tail -f /home/jonnattan/requirements.txt
+networks:
+  db-net:
