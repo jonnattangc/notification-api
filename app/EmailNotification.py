@@ -35,7 +35,7 @@ class EmailNotification():
         try :
             if request.headers['x-api-key'] == self.api_key :
                 request_data = request.get_json()
-                subject = 'Mensaje de ' + str(request_data['type'])
+                subject = str(request_data['asunto'])
                 success, msg = self.sendMailMessage(request_data['to'], subject, request_data['msg'])
                 if success == False :
                     code = 500
