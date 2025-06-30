@@ -25,19 +25,21 @@ formatter = logging.Formatter(FORMAT)
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)
 handler.setFormatter(formatter)
-filehandle = logging.FileHandler('Monitor.log')
-filehandle.setLevel(logging.INFO)
-filehandle.setFormatter(formatter)
+#filehandle = logging.FileHandler('Monitor.log')
+#filehandle.setLevel(logging.INFO)
+#filehandle.setFormatter(formatter)
 # se meten ambas configuraciones
-root.addHandler(handler)
-root.addHandler(filehandle)
+#root.addHandler(handler)
+#root.addHandler(filehandle)
 logger = logging.getLogger('HTTP')
 
 # ===============================================================================
 # Inicia App
 # ===============================================================================
+CONTEXT_PATH : str = '/notification'
+
 app = Flask(__name__)
-cors = CORS(app, resources={r"/api/*": {"origins": ["dev.jonnattan.com"]}})
+cors = CORS(app, resources={r"/notification/*": {"origins": ["dev.jonnattan.com", "api.jonnattan.cl"]},})
 
 # ===============================================================================
 # Variables de entorno
@@ -46,14 +48,14 @@ ROOT_DIR = os.path.dirname(__file__)
 #===============================================================================
 # Redirige
 #===============================================================================
-@app.route('/', methods=['GET', 'POST', 'PUT'])
+@app.route( CONTEXT_PATH + '/', methods=['GET', 'POST', 'PUT'])
 def index():
     return redirect('/info'), 302
 
 #===============================================================================
 # Redirige
 #===============================================================================
-@app.route('/info/<path:subpath>', methods=('GET', 'POST','PUT'))
+@app.route( CONTEXT_PATH + '/info/<path:subpath>', methods=('GET', 'POST','PUT'))
 def proccess_api( subpath ) :
     logging.info("Reciv solicitude endpoint: " + subpath )
     return redirect('/info'), 302
@@ -61,19 +63,18 @@ def proccess_api( subpath ) :
 #===============================================================================
 # Llamada API
 #===============================================================================
-@app.route('/info', methods=['GET', 'POST', 'PUT'])
+@app.route( CONTEXT_PATH + '/info', methods=['GET', 'POST', 'PUT'])
 def api() :
     logger.info("ROOT_DIR: " + str(ROOT_DIR) )
     logger.info("ROOT_DIR: " + app.root_path)
     return jsonify({
-        "Servidor": "Oracle Cloud",
-        "Nombre": "Jonnattan G",
-        "Linkedin":"https://www.linkedin.com/in/jonnattan/"
+        "API": "API de notificación",
+        "Nombre": "Jonnattan G"
     })
 #===============================================================================
 # Cualquier pagina que ocupe JS desde este servidor para por ac'a
 #===============================================================================
-@app.route('/page/js/<path:namejs>')
+@app.route( CONTEXT_PATH + '/page/js/<path:namejs>')
 def process_jsfile( namejs ):
     file_path = os.path.join(ROOT_DIR, 'static')
     file_path = os.path.join(file_path, 'js')
@@ -82,14 +83,14 @@ def process_jsfile( namejs ):
 #===============================================================================
 # Redirige
 #===============================================================================
-@app.route('/web', methods=['GET'])
+@app.route( CONTEXT_PATH + '/web', methods=['GET'])
 def web():
     return render_template( 'page.html' )
 
 #===============================================================================
 # Llamada API
 #===============================================================================
-@app.route('/status', methods=['POST'])
+@app.route( CONTEXT_PATH + '/status', methods=['POST'])
 def status() :
     check = CheckStatus()
     data, code = check.getStatusPages( request )
@@ -99,7 +100,7 @@ def status() :
 #===============================================================================
 # Testea envio de mail (desactivado)
 #===============================================================================
-@app.route('/sendmail', methods=['POST'])
+@app.route( CONTEXT_PATH + '/mail', methods=['POST'])
 def mail() :
     mail = EmailNotification()
     data, code = mail.processSendEmail( request )
@@ -109,7 +110,7 @@ def mail() :
 #===============================================================================
 # Testea envio de mensa vía whatsapp (desactivado)
 #===============================================================================
-@app.route('/wazap', methods=['POST'])
+@app.route( CONTEXT_PATH + '/wazap', methods=['POST'])
 def wazap() :
     waza = WazaMessage()
     data, code = waza.requestProcess(request )

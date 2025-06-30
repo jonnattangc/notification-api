@@ -23,7 +23,7 @@ class WazaMessage() :
     waza_token = os.environ.get('WAZA_BEARER_TOKEN','None')
     api_key = os.environ.get('API_KEY_MONITORING','None')
     phone_id = os.environ.get('PHONE_ID','None')
-
+    ws_api_version = os.environ.get('WAZA_API_VERSION','None')
     database = 'gral-purpose'
     environment = None
     bearer_token = 'Bearer ' + str(waza_token)
@@ -108,7 +108,7 @@ class WazaMessage() :
             }
         }
 
-        url = 'https://graph.facebook.com/v18.0/' + str(self.phone_id) + '/messages'
+        url = 'https://graph.facebook.com/' + str(self.ws_api_version) + '/' + str(self.phone_id) + '/messages'
         # logging.info("Request To : " + url )
         try :
             response = requests.post(url, data = json.dumps(data_json), headers = self.headers, timeout = 40)
