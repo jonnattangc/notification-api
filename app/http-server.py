@@ -6,7 +6,6 @@ try:
     import os
     from flask import Flask, jsonify, redirect, send_from_directory, request, render_template
     from flask_cors import CORS
-    from CheckStatus import CheckStatus
     from EmailNotification import EmailNotification
     from WazaMessage import WazaMessage 
 except ImportError:
@@ -25,12 +24,6 @@ formatter = logging.Formatter(FORMAT)
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)
 handler.setFormatter(formatter)
-#filehandle = logging.FileHandler('Monitor.log')
-#filehandle.setLevel(logging.INFO)
-#filehandle.setFormatter(formatter)
-# se meten ambas configuraciones
-#root.addHandler(handler)
-#root.addHandler(filehandle)
 logger = logging.getLogger('HTTP')
 
 # ===============================================================================
@@ -87,15 +80,6 @@ def process_jsfile( namejs ):
 def web():
     return render_template( 'page.html' )
 
-#===============================================================================
-# Llamada API
-#===============================================================================
-@app.route( CONTEXT_PATH + '/status', methods=['POST'])
-def status() :
-    check = CheckStatus()
-    data, code = check.getStatusPages( request )
-    del check
-    return jsonify( data ), code
 
 #===============================================================================
 # Testea envio de mail (desactivado)
