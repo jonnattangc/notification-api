@@ -6,8 +6,7 @@ try:
     import os
     from flask import Flask, jsonify, redirect, send_from_directory, request, render_template
     from flask_cors import CORS
-    from EmailNotification import EmailNotification
-    from WazaMessage import WazaMessage 
+    from Notification import Notification
 except ImportError:
     logging.error(ImportError)
     print((os.linesep * 2).join(['Error al buscar los modulos:', str(sys.exc_info()[1]), 'Debes Instalarlos para continuar', 'Deteniendo...']))
@@ -24,6 +23,8 @@ formatter = logging.Formatter(FORMAT)
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)
 handler.setFormatter(formatter)
+root.addHandler(handler)
+
 logger = logging.getLogger('HTTP')
 
 # ===============================================================================
@@ -38,12 +39,16 @@ cors = CORS(app, resources={r"/notification/*": {"origins": ["dev.jonnattan.com"
 # Variables de entorno
 # ===============================================================================
 ROOT_DIR = os.path.dirname(__file__)
+
 #===============================================================================
 # Redirige
 #===============================================================================
-@app.route( CONTEXT_PATH + '/', methods=['GET', 'POST', 'PUT'])
-def index():
-    return redirect('/info'), 302
+@app.route( CONTEXT_PATH + '/<path:subpath>', methods=['GET', 'POST', 'PUT'])
+def notification( subpath: str  ) : 
+    notification : Notification = Notification() 
+    data_response, http_code = notification.process( request, subpath )
+    del notification
+    return jsonify( data_response ), http_code
 
 #===============================================================================
 # Redirige
@@ -80,26 +85,6 @@ def process_jsfile( namejs ):
 def web():
     return render_template( 'page.html' )
 
-
-#===============================================================================
-# Testea envio de mail (desactivado)
-#===============================================================================
-@app.route( CONTEXT_PATH + '/mail', methods=['POST'])
-def mail() :
-    mail = EmailNotification()
-    data, code = mail.processSendEmail( request )
-    del mail
-    return jsonify( data ), code
-
-#===============================================================================
-# Testea envio de mensa vía whatsapp (desactivado)
-#===============================================================================
-@app.route( CONTEXT_PATH + '/wazap', methods=['POST'])
-def wazap() :
-    waza = WazaMessage()
-    data, code = waza.requestProcess(request )
-    del waza
-    return jsonify( data ), code
 
 # ===============================================================================
 # Metodo Principal que levanta el servidor
