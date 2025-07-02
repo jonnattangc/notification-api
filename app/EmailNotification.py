@@ -15,52 +15,13 @@ except ImportError:
     sys.exit(-2)
 
 class EmailNotification():
-
     user = os.environ.get('USER_MAIL','None')
     password = os.environ.get('PASS_MAIL','None')
-    api_key = os.environ.get('API_KEY_MONITORING','None')
     smtp_server = 'smtp.gmail.com'
     smtp_port = 587
 
-    def processSendEmail(self, request):
-        m1 = time.monotonic()
-        success = True
-
-        response = { 
-            "success": success, 
-            "msg": "Mensaje enviado exitosamente" 
-        }
-        code = 200
-
-        try :
-            if request.headers['x-api-key'] == self.api_key :
-                request_data = request.get_json()
-                subject = str(request_data['asunto'])
-                success, msg = self.sendMailMessage(request_data['to'], subject, request_data['msg'])
-                if success == False :
-                    code = 500
-            else :
-                success = False
-                msg = "No Autorizado"
-                code = 401
-        except Exception as e:
-            print("ERROR Mail:", e)
-            success = False
-            msg = str(e) 
-            code = 500
-
-        response = {
-            "success": success, 
-            "msg": str(msg) 
-        }            
-
-        logging.info("Procesado en " + str(time.monotonic() - m1) + " Seg")
-        return response, code 
-    
-
     def sendMailMessage(self, to, subject, text):
         success = True
-        response = 'Mensaje Enviado Exitosamente'
         try :
             msg = EmailMessage()
             msg['Subject'] = str(subject)
@@ -81,6 +42,5 @@ class EmailNotification():
         except Exception as e:
             print("ERROR Mail:", e)
             success = False
-            response = str(e)
-        return success, response
+        return success
         
