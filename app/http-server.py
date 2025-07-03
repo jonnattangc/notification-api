@@ -50,42 +50,6 @@ def notification( subpath: str  ) :
     del notification
     return jsonify( data_response ), http_code
 
-#===============================================================================
-# Redirige
-#===============================================================================
-@app.route( CONTEXT_PATH + '/info/<path:subpath>', methods=('GET', 'POST','PUT'))
-def proccess_api( subpath ) :
-    logging.info("Reciv solicitude endpoint: " + subpath )
-    return redirect('/info'), 302
-
-#===============================================================================
-# Llamada API
-#===============================================================================
-@app.route( CONTEXT_PATH + '/info', methods=['GET', 'POST', 'PUT'])
-def api() :
-    logger.info("ROOT_DIR: " + str(ROOT_DIR) )
-    logger.info("ROOT_DIR: " + app.root_path)
-    return jsonify({
-        "API": "API de notificación",
-        "Nombre": "Jonnattan G"
-    })
-#===============================================================================
-# Cualquier pagina que ocupe JS desde este servidor para por ac'a
-#===============================================================================
-@app.route( CONTEXT_PATH + '/page/js/<path:namejs>')
-def process_jsfile( namejs ):
-    file_path = os.path.join(ROOT_DIR, 'static')
-    file_path = os.path.join(file_path, 'js')
-    return send_from_directory(file_path, str(namejs) )
-
-#===============================================================================
-# Redirige
-#===============================================================================
-@app.route( CONTEXT_PATH + '/web', methods=['GET'])
-def web():
-    return render_template( 'page.html' )
-
-
 # ===============================================================================
 # Metodo Principal que levanta el servidor
 # ===============================================================================

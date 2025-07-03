@@ -14,22 +14,22 @@ except ImportError:
 
 
 class WazaMessage() :
-
-    waza_token = os.environ.get('WAZA_BEARER_TOKEN','None')
-    phone_id = os.environ.get('PHONE_ID','None')
-    ws_api_version = os.environ.get('WAZA_API_VERSION','None')
-    bearer_token : str = 'Bearer ' + str(waza_token)
-    headers = None
+    ws_api_version : str = None
 
     def __init__(self) :
         try:
-            self.headers = {'Content-Type': 'application/json', 'Authorization': str(self.bearer_token) }
+            self.api_version = str(os.environ.get('WAZA_API_VERSION','None'))
         except Exception as e :
-            print("ERROR BD:", e)
+            print("Error: __INIT__:", e)
 
-
-    def sendWazaMessage(self, to: str = '56992116678', subject: str = 'Alerta de Sistema', body: str = 'Alerta de Sistema' ) :
+    def sendWazaMessage(self, to: str, subject: str, body: str, client ) :
         name_thread = '[' + threading.current_thread().name + '-' + str(threading.get_native_id()) + '] '
+
+        ws_headers = {
+            'Content-Type': 'application/json', 
+            'Authorization': 'Bearer ' + str(client['bearer_token']) 
+        }
+
         success : bool = False
         data_json = {
             'messaging_product' : 'whatsapp',
@@ -64,10 +64,10 @@ class WazaMessage() :
                 ]
             }
         }
-        url = 'https://graph.facebook.com/' + str(self.ws_api_version) + '/' + str(self.phone_id) + '/messages'
+        url = 'https://graph.facebook.com/' + str(self.api_version) + '/' + str(client['phone_origin']) + '/messages'
         # logging.info("Request To : " + url )
         try :
-            response = requests.post(url, data = json.dumps(data_json), headers = self.headers, timeout = 30 )
+            response = requests.post(url, data = json.dumps(data_json), headers = ws_headers, timeout = 10 )
             data_response = response.json()
             if response.status_code != None and response.status_code == 200 :
                 data_response = response.json()
