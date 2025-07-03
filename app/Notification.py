@@ -25,9 +25,8 @@ except ImportError:
 def message_process( json_data, path : str ) :
         process = psutil.Process(threading.get_native_id())
         mem_info = process.memory_info() 
-        logging.info("after start thread memory: " + str(mem_info.rss))
-
         name_thread = '[' + threading.current_thread().name + '-' + str(threading.get_native_id()) + '] '
+        logging.info(name_thread + "After start thread memory: " + str(mem_info.rss))
         success: bool = False
         try :
             if path.find('mail') >= 0 :    
@@ -36,7 +35,7 @@ def message_process( json_data, path : str ) :
                 del mail
             elif path.find('waza') >= 0 :
                 waza = WazaMessage()     
-                success = waza.sendWazaMessage(json_data['name'], json_data['system'], json_data['to'])
+                success = waza.sendWazaMessage(str(json_data['to']), str(json_data['subject']), str(json_data['body']))
                 del waza
             else :
                 success = False
@@ -47,7 +46,7 @@ def message_process( json_data, path : str ) :
         gc.collect()
 
         mem_info = process.memory_info() 
-        logging.info("before stop thread memory: " + str(mem_info.rss))
+        logging.info(name_thread + "Before stop thread memory: " + str(mem_info.rss))
 
         if success :
             logging.info(name_thread + 'ha terminado con exito...')
@@ -70,7 +69,6 @@ class Notification():
         #except Exception as e :
         #    logging.error( e )
         #del self.th
-
 
     def process(self, request, subpath: str ) :
         data_response = {"message" : "Servicio ejecutado exitosamente", "data": None}

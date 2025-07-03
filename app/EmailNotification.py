@@ -7,6 +7,7 @@ try:
     import time
     import smtplib
     from email.message import EmailMessage
+    import threading
 
 except ImportError:
 
@@ -21,6 +22,7 @@ class EmailNotification():
     smtp_port = 587
 
     def sendMailMessage(self, to, subject, text):
+        name_thread = '[' + threading.current_thread().name + '-' + str(threading.get_native_id()) + '] '
         success = True
         try :
             msg = EmailMessage()
@@ -28,19 +30,19 @@ class EmailNotification():
             msg['From'] = str(self.user)
             msg['To'] = str(to)
             msg.set_content(str(text))
-            logging.info("Connect to Server Mail..." )
+            logging.info(name_thread + "Connect to Server Mail..." )
             server = smtplib.SMTP(self.smtp_server, self.smtp_port)
             server.connect(self.smtp_server, self.smtp_port)
             server.ehlo()
             server.starttls()
             server.ehlo()
-            logging.info("Login on Server Mail..." )
+            logging.info(name_thread + "Login on Server Mail..." )
             server.login(self.user, self.password)
             server.send_message(msg)
-            logging.info("Mail Message sent..." )
+            logging.info(name_thread + "Mail Message sent..." )
             server.quit()
         except Exception as e:
-            print("ERROR Mail:", e)
+            print(name_thread + "ERROR Mail:", e)
             success = False
         return success
         

@@ -5,6 +5,7 @@ try:
     import os
     import json
     import requests
+    import threading
 
 except ImportError:
     logging.error(ImportError)
@@ -27,9 +28,9 @@ class WazaMessage() :
             print("ERROR BD:", e)
 
 
-    def sendWazaMessage(self, name, system, to = '56992116678' ) :
+    def sendWazaMessage(self, to: str = '56992116678', subject: str = 'Alerta de Sistema', body: str = 'Alerta de Sistema' ) :
+        name_thread = '[' + threading.current_thread().name + '-' + str(threading.get_native_id()) + '] '
         success : bool = False
-
         data_json = {
             'messaging_product' : 'whatsapp',
             'recipient_type'    : 'individual',
@@ -47,7 +48,7 @@ class WazaMessage() :
                         'parameters': [
                             {
                             'type': 'text',
-                            'text': str(name)
+                            'text': str(subject)
                             }
                         ]
                         },
@@ -56,25 +57,24 @@ class WazaMessage() :
                         'parameters': [
                             {
                             'type': 'text',
-                            'text': str(system)
+                            'text': str(body)
                             }
                         ]
                         },
                 ]
             }
         }
-
         url = 'https://graph.facebook.com/' + str(self.ws_api_version) + '/' + str(self.phone_id) + '/messages'
         # logging.info("Request To : " + url )
         try :
-            response = requests.post(url, data = json.dumps(data_json), headers = self.headers, timeout = 40)
+            response = requests.post(url, data = json.dumps(data_json), headers = self.headers, timeout = 30 )
             data_response = response.json()
             if response.status_code != None and response.status_code == 200 :
                 data_response = response.json()
-                logging.info("Response : " + str( data_response ) )
+                logging.info(name_thread + "Response : " + str( data_response['messages'][0]['message_status'] ) )
                 success = True
             else :
-                logging.error("ERROR Response : " + str( data_response ) )
+                logging.error(name_thread + "ERROR Response : " + str( data_response ) )
                 success = False
         except Exception as e:
             print("ERROR POST:", e)
