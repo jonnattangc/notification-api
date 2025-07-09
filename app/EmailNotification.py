@@ -26,7 +26,7 @@ class EmailNotification():
             try :
                 msg = EmailMessage()
                 msg['Subject'] = subject
-                msg['From'] = str(client['mail_user'])
+                msg['From'] = '\"' + str(client['company_name']) + '\" <' + str(client['mail_user']) + '>'
                 msg['To'] = to
                 msg.set_content(body)
 
