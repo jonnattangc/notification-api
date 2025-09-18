@@ -1,11 +1,3 @@
-FROM python:3.14-rc-alpine AS builder
-
-WORKDIR /src
-
-COPY requirements.txt /src/requirements.txt
-
-RUN pip wheel --no-cache-dir --wheel-dir=/src/dist -r requirements.txt
-
 FROM python:3.14-rc-slim
 
 LABEL MAINTAINER="Jonnattan Griffiths"
@@ -42,9 +34,7 @@ USER jonnattan
 
 COPY . .
 
-COPY --from=builder --chown=10100:10101 --chmod=755 /src/dist /home/jonnattan/dist
-
-RUN pip install --no-cache-dir --no-index --find-links=file:///home/jonnattan/dist -r requirements.txt
+RUN pip install -r requirements.txt
 
 WORKDIR /home/jonnattan/app
 

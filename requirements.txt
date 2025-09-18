@@ -8,6 +8,8 @@ idna==3.10
 itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.2
+psutil==7.0.0
+pycryptodome==3.23.0
 PyMySQL==1.1.1
 requests==2.32.4
 urllib3==2.5.0
