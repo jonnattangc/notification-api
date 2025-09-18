@@ -112,14 +112,15 @@ class Notification():
             http_code  = 409
             return  data_response, http_code
         else :
-            logging.info('x-api-key found')
+            logging.info(f'x-api-key found : {rx_api_key}')
             client = self.get_client(rx_api_key)
             if client == None :
                 data_response = {"message" : "No autorizado", "data": None}
                 http_code  = 401
                 logging.error('x-api-key is not valid')
                 return  data_response, http_code
-        
+            else :
+                logging.info(f'Client found: {client}' )
         path : str = None 
         if subpath != None : 
             path = subpath.lower().strip()
@@ -154,6 +155,7 @@ class Notification():
             
             self.th = threading.Thread(target=message_process, args=( json_data, path, client ), name='th')
             self.th.start()
+            
         elif request.method == 'GET' :
             #===============================================================================
             # Cualquier pagina que ocupe JS desde este servidor para por ac'a
