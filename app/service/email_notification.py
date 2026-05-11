@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 try:
     import logging
     import sys
@@ -8,41 +7,43 @@ try:
     import smtplib
     from email.message import EmailMessage
     import threading
+    from service.anotification import ANotification
 
 except ImportError:
-
     logging.error(ImportError)
     print((os.linesep * 2).join(['Error al buscar los modulos:', str(sys.exc_info()[1]), 'Debes Instalarlos para continuar', 'Deteniendo...']))
     sys.exit(-2)
 
-class EmailNotification():
+class EmailNotification(ANotification):
 
-    def sendMailMessage(self, to: str, subject: str, body: str, client):
+    def send_message(self, json_data: dict, client : dict) -> bool:
+
+        to, subject, body = json_data['to'], json_data['subject'], json_data['body']
+        success : bool = False
         smtp_server = 'smtp.gmail.com'
-        smtp_port = 587        
-        if client is not None :
+        smtp_port = 587
+        if client is not None:
             name_thread = '[' + threading.current_thread().name + '-' + str(threading.get_native_id()) + '] '
-            success = True
-            try :
+            
+            try:
                 msg = EmailMessage()
                 msg['Subject'] = subject
-                msg['From'] = '\"' + str(client['company_name']) + '\" <' + str(client['mail_user']) + '>'
+                msg['From'] = '"' + str(client['company_name']) + '" <' + str(client['mail_user']) + '>'
                 msg['To'] = to
                 msg.set_content(body)
-
-                logging.info(name_thread + "Connect to Server Mail..." )
+                logging.info(name_thread + "Connect to Server Mail...")
                 server = smtplib.SMTP(smtp_server, smtp_port)
                 server.connect(smtp_server, smtp_port)
                 server.ehlo()
                 server.starttls()
                 server.ehlo()
-                logging.info(name_thread + "Login on Server Mail..." )
-                server.login(str(client['mail_user']), str(client['password']))
+                logging.info(name_thread + "Login on Server Mail...")
+                server.login(str(client['mail_user']), str(client['mail_pass']))
                 server.send_message(msg)
-                logging.info(name_thread + "Mail Message sent to " + str(to) + " ..." )
+                success = True
+                logging.info(name_thread + "Mail Message sent to " + str(to) + " ...")
                 server.quit()
             except Exception as e:
                 print(name_thread + "ERROR Mail:", e)
                 success = False
         return success
-        
