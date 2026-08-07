@@ -3,7 +3,7 @@ try:
     import logging
     import sys
     import os
-    from flask import Blueprint, jsonify, redirect, send_from_directory, request, render_template
+    from flask import Blueprint, jsonify, redirect, send_from_directory, request
     from service.notification_service import NotificationService
 
 except ImportError:
@@ -14,18 +14,8 @@ except ImportError:
 notification_blueprint = Blueprint('notification', __name__)
 ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
 
-@notification_blueprint.route('/notification/<path:subpath>', methods=['GET', 'POST', 'PUT'])
+@notification_blueprint.route('/notification/<path:subpath>', methods=['POST'])
 def notification(subpath: str):
-    if request.method == 'GET':
-        path = subpath.lower().strip() if subpath else ''
-        if path.find('js') >= 0:
-            file_path = os.path.join(ROOT_DIR, 'app', 'static', 'js')
-            return send_from_directory(file_path, subpath), 200
-        elif path.find('web') >= 0:
-            return render_template('page.html'), 200
-        else:
-            return jsonify({"message": "No encontrado", "data": None}), 404
-
     # POST / PUT
     logging.info("Reciv " + str(request.method) + " Contex: /notification/" + str(subpath))
     logging.info("Reciv Data: " + str(request.data))

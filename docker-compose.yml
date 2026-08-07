@@ -1,13 +1,13 @@
 services:
     notification-api:
       container_name: notification-api
-      image: jonnattangc/notificationservice:1.0.0 
+      image: jonnattangc/notification-api:1.0.1
       build: .
       restart: none
       ports:
         - "8060:8060"
-      #volumes:
-      #  - .:/home/jonnattan
+      volumes:
+        - .:/home/jonnattan
       env_file:
         - ../envs/notification_api.env
       networks:

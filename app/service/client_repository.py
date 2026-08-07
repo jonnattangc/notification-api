@@ -52,7 +52,7 @@ class ClientRepository():
                         'company_name'  : str(row['company']),
                         'mail_user'     : str(row['mail_user']),
                         'mail_pass'     : str(row['mail_pass']),
-                        'meta_filter'     : str(row['meta_filter']),
+                        'meta_filter'   : str(row['meta_filter']),
                         'api_key'       : str(row['apikey'])
                     }
                     logging.info("Client found: " + str(client['company_name']))

@@ -32,7 +32,7 @@ logger = logging.getLogger('HTTP')
 # Inicia App
 # ===============================================================================
 app = Flask(__name__)
-cors = CORS(app, resources={r"/notification/*": {"origins": ["dev.jonnattan.com", "api.jonnattan.cl"]},})
+cors = CORS(app, resources={r"/notification/*": {"origins": ["api.jonnattan.com", "dev.jonnattan.com", "api.jonnattan.cl", "logia.buenaventuracadiz.cl", "api.jonnatech.cl"]},})
 app.register_blueprint(notification_blueprint)
 
 # ===============================================================================
